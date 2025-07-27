@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh">
+　　<!DOCTYPE html><html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,28 +97,6 @@
     }
     .delete-btn:hover {
       background: #e60000;
-    }
-    .edit-btn {
-      position: absolute;
-      top: 10px;
-      right: 70px;
-      background: #4CAF50;
-      padding: 5px 10px;
-      font-size: 12px;
-    }
-    .edit-btn:hover {
-      background: #3e8e41;
-    }
-    .restore-btn {
-      position: absolute;
-      top: 10px;
-      right: 130px;
-      background: #ff9800;
-      padding: 5px 10px;
-      font-size: 12px;
-    }
-    .restore-btn:hover {
-      background: #e68a00;
     }
     .image-upload {
       margin: 15px 0;
@@ -221,83 +199,42 @@
       cursor: pointer;
       font-size: 20px;
     }
-    /* 编辑表单样式 */
-    .edit-form {
-      display: none;
-      margin-top: 15px;
-      padding: 15px;
-      background: #f9f9f9;
-      border-radius: 8px;
-    }
-    .history-info {
-      font-size: 12px;
-      color: #666;
-      margin-top: 5px;
-    }
-    /* 回收站样式 */
-    .recycle-bin-btn {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: #ff5722;
-      color: white;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
+
+    /* 新增日历多表情样式 */
+    .calendar-day .mood-icons {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
       justify-content: center;
-      font-size: 24px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      cursor: pointer;
-      z-index: 10;
-    }
-    .recycle-bin-btn:hover {
-      background: #e64a19;
-    }
-    .recycle-bin-count {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #f44336;
-      color: white;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 12px;
-    }
-    /* 回收站模态框样式 */
-    .bin-entry {
-      background: #fff8f8;
-      border-left: 4px solid #ff5722;
-      margin-bottom: 10px;
-      padding: 15px;
-      border-radius: 4px;
-      position: relative;
-    }
-    .bin-entry-date {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .bin-actions {
-      display: flex;
-      gap: 10px;
+      gap: 2px;
+      font-size: 16px;
       margin-top: 10px;
     }
-    .bin-actions button {
-      padding: 5px 10px;
-      font-size: 12px;
+    
+    .calendar-day .mood-icon {
+      font-size: 16px;
+      line-height: 1;
     }
-    .empty-bin-btn {
-      background: #ff5722;
-      margin-top: 20px;
+    
+    .calendar-day.has-multiple-entries {
+      background: linear-gradient(135deg, #e6f2ff, #d9e6ff);
     }
-    .empty-bin-btn:hover {
-      background: #e64a19;
+    
+    .mood-count-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: #4a90e2;
+      color: white;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
   </style>
 </head>
 <body>
@@ -340,7 +277,7 @@
         <option value="🥳">庆祝！🥳</option>
         <option value="🥹">感动 🥹</option>
         <option value="🥺">卖萌 🥺</option>
-        <option value="🙄">go away 🙄</option>
+         <option value="🙄">Go away！🙄</option>
       </select>
       
       <span class="mood-label">标签分类</span>
@@ -375,13 +312,7 @@
     </div>
   </div>
   
-  <!-- 回收站按钮 -->
-  <div class="recycle-bin-btn" onclick="showRecycleBin()">
-    🗑️
-    <div class="recycle-bin-count" id="binCount">0</div>
-  </div>
-  
-  <!-- 主模态框 -->
+  <!-- 模态框 -->
   <div id="dateModal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal()">×</span>
@@ -390,30 +321,17 @@
     </div>
   </div>
   
-  <!-- 回收站模态框 -->
-  <div id="recycleBinModal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeRecycleBin()">×</span>
-      <h2>回收站</h2>
-      <p>已删除的日记会在这里保留，你可以恢复或永久删除它们。</p>
-      <div id="binEntries"></div>
-      <button class="empty-bin-btn" onclick="emptyRecycleBin()">清空回收站</button>
-    </div>
-  </div>
-  
   <script>
     let entries = JSON.parse(localStorage.getItem("diaryEntries")) || [];
-    let recycleBin = JSON.parse(localStorage.getItem("diaryRecycleBin")) || [];
     let currentImage = null;
     let currentView = "list";
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
-    let currentlyEditingId = null;
+
 
     // 初始化
     document.addEventListener('DOMContentLoaded', function() {
       renderCalendar();
-      updateBinCount();
     });
 
     // 图片上传预览
@@ -438,148 +356,21 @@
       const dateString = date.toLocaleString();
       const dateOnly = formatDate(date);
       
-      if (currentlyEditingId) {
-        // 更新现有条目
-        const entryIndex = entries.findIndex(e => e.id === currentlyEditingId);
-        if (entryIndex !== -1) {
-          const originalEntry = entries[entryIndex];
-          
-          // 创建修改记录
-          const editHistory = originalEntry.editHistory || [];
-          editHistory.push({
-            editedAt: new Date().toLocaleString(),
-            previousText: originalEntry.text,
-            previousMood: originalEntry.mood,
-            previousCategory: originalEntry.category,
-            previousImage: originalEntry.image
-          });
-          
-          // 更新条目但保留原始创建时间
-          entries[entryIndex] = { 
-            ...originalEntry,
-            text,
-            mood,
-            category,
-            image: currentImage || originalEntry.image,
-            editHistory,
-            lastEdited: new Date().toLocaleString()
-          };
-          
-          localStorage.setItem("diaryEntries", JSON.stringify(entries));
-          currentlyEditingId = null;
-          renderEntries();
-          if (currentView === "calendar") renderCalendar();
-          clearForm();
-        }
-      } else {
-        // 创建新条目
-        const entry = { 
-          text, 
-          mood, 
-          category, 
-          date: dateString,
-          dateOnly,
-          image: currentImage || null,
-          id: Date.now(),
-          createdAt: dateString,
-          lastEdited: null,
-          editHistory: []
-        };
+      const entry = { 
+        text, 
+        mood, 
+        category, 
+        date: dateString,
+        dateOnly,
+        image: currentImage || null,
+        id: Date.now()
+      };
 
-        entries.unshift(entry);
-        localStorage.setItem("diaryEntries", JSON.stringify(entries));
-        renderEntries();
-        if (currentView === "calendar") renderCalendar();
-        clearForm();
-      }
-    }
-
-    function editEntry(id) {
-      const entry = entries.find(e => e.id === id);
-      if (entry) {
-        currentlyEditingId = id;
-        document.getElementById("diaryText").value = entry.text;
-        document.getElementById("mood").value = entry.mood;
-        document.getElementById("category").value = entry.category;
-        
-        if (entry.image) {
-          document.getElementById("imagePreview").src = entry.image;
-          document.getElementById("imagePreview").style.display = 'block';
-          currentImage = entry.image;
-        } else {
-          document.getElementById("imagePreview").style.display = 'none';
-          document.getElementById("imagePreview").src = '';
-          currentImage = null;
-        }
-        
-        // 滚动到表单
-        document.getElementById("diaryText").scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-
-    function moveToRecycleBin(id) {
-      const entryIndex = entries.findIndex(e => e.id === id);
-      if (entryIndex !== -1) {
-        const entry = entries[entryIndex];
-        entry.deletedAt = new Date().toLocaleString();
-        
-        // 添加到回收站
-        recycleBin.unshift(entry);
-        localStorage.setItem("diaryRecycleBin", JSON.stringify(recycleBin));
-        
-        // 从主列表中移除
-        entries.splice(entryIndex, 1);
-        localStorage.setItem("diaryEntries", JSON.stringify(entries));
-        
-        renderEntries();
-        if (currentView === "calendar") renderCalendar();
-        updateBinCount();
-      }
-    }
-
-    function restoreFromBin(id) {
-      const entryIndex = recycleBin.findIndex(e => e.id === id);
-      if (entryIndex !== -1) {
-        const entry = recycleBin[entryIndex];
-        
-        // 移回主列表
-        entries.unshift(entry);
-        localStorage.setItem("diaryEntries", JSON.stringify(entries));
-        
-        // 从回收站移除
-        recycleBin.splice(entryIndex, 1);
-        localStorage.setItem("diaryRecycleBin", JSON.stringify(recycleBin));
-        
-        renderRecycleBin();
-        renderEntries();
-        if (currentView === "calendar") renderCalendar();
-        updateBinCount();
-      }
-    }
-
-    function deletePermanently(id) {
-      if (confirm("确定要永久删除这条记录吗？此操作无法撤销！")) {
-        const entryIndex = recycleBin.findIndex(e => e.id === id);
-        if (entryIndex !== -1) {
-          recycleBin.splice(entryIndex, 1);
-          localStorage.setItem("diaryRecycleBin", JSON.stringify(recycleBin));
-          
-          renderRecycleBin();
-          updateBinCount();
-        }
-      }
-    }
-
-    function emptyRecycleBin() {
-      if (recycleBin.length === 0) return;
-      
-      if (confirm("确定要清空回收站吗？所有已删除的记录将永久丢失！")) {
-        recycleBin = [];
-        localStorage.setItem("diaryRecycleBin", JSON.stringify(recycleBin));
-        
-        renderRecycleBin();
-        updateBinCount();
-      }
+      entries.unshift(entry);
+      localStorage.setItem("diaryEntries", JSON.stringify(entries));
+      renderEntries();
+      if (currentView === "calendar") renderCalendar();
+      clearForm();
     }
 
     function clearForm() {
@@ -589,7 +380,6 @@
       document.getElementById("imagePreview").style.display = "none";
       document.getElementById("imagePreview").src = "";
       currentImage = null;
-      currentlyEditingId = null;
     }
 
     function renderEntries(filter = "") {
@@ -611,84 +401,25 @@
             imageHtml = `<img src="${e.image}" class="entry-image">`;
           }
           
-          let editInfo = "";
-          if (e.lastEdited) {
-            editInfo = `<div class="history-info">创建于: ${e.createdAt}<br>最后编辑于: ${e.lastEdited}</div>`;
-          } else {
-            editInfo = `<div class="history-info">创建于: ${e.createdAt}</div>`;
-          }
-          
           div.innerHTML = `
             <strong>${e.date}</strong><br>
             心情：${e.mood}<br>
             标签：${e.category}<br>
             ${e.text}
             ${imageHtml}
-            ${editInfo}
-            <button class="edit-btn" onclick="editEntry(${e.id})">编辑</button>
-            <button class="delete-btn" onclick="moveToRecycleBin(${e.id})">删除</button>
-            
-            ${renderEditHistory(e.editHistory)}
+            <button class="delete-btn" onclick="deleteEntry(${e.id})">删除</button>
           `;
           container.appendChild(div);
         });
     }
 
-    function renderRecycleBin() {
-      const container = document.getElementById("binEntries");
-      container.innerHTML = "";
-      
-      if (recycleBin.length === 0) {
-        container.innerHTML = "<p style='text-align: center; color: #666;'>回收站是空的</p>";
-        return;
+    function deleteEntry(id) {
+      if (confirm("确定要删除这条记录吗？")) {
+        entries = entries.filter(e => e.id !== id);
+        localStorage.setItem("diaryEntries", JSON.stringify(entries));
+        renderEntries();
+        if (currentView === "calendar") renderCalendar();
       }
-      
-      recycleBin.forEach(e => {
-        const div = document.createElement("div");
-        div.className = "bin-entry";
-        
-        let imageHtml = "";
-        if (e.image) {
-          imageHtml = `<img src="${e.image}" class="entry-image" style="max-width: 100px;">`;
-        }
-        
-        div.innerHTML = `
-          <div class="bin-entry-date">${e.date}</div>
-          <div>心情：${e.mood}</div>
-          <div>标签：${e.category}</div>
-          <div>${e.text}</div>
-          ${imageHtml}
-          <div class="bin-actions">
-            <button onclick="restoreFromBin(${e.id})">恢复</button>
-            <button onclick="deletePermanently(${e.id})" style="background: #ff4d4d">永久删除</button>
-          </div>
-          <div class="history-info">删除于: ${e.deletedAt}</div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function renderEditHistory(history) {
-      if (!history || history.length === 0) return "";
-      
-      let html = `<div class="edit-history" style="margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 10px;">
-                    <h4 style="margin-bottom: 5px;">编辑历史：</h4>`;
-      
-      history.forEach((edit, index) => {
-        html += `<div style="margin-bottom: 10px; font-size: 13px;">
-                  <strong>编辑 ${index + 1}:</strong> ${edit.editedAt}<br>
-                  ${edit.previousMood ? `心情: ${edit.previousMood}<br>` : ''}
-                  ${edit.previousCategory ? `标签: ${edit.previousCategory}<br>` : ''}
-                  ${edit.previousText ? `内容: ${edit.previousText}<br>` : ''}
-                 </div>`;
-      });
-      
-      html += `</div>`;
-      return html;
-    }
-
-    function updateBinCount() {
-      document.getElementById("binCount").textContent = recycleBin.length;
     }
 
     function searchEntries() {
@@ -696,65 +427,6 @@
       renderEntries(query);
     }
 
-    // 日历功能
-    function renderCalendar() {
-      const calendarEl = document.getElementById("calendar");
-      calendarEl.innerHTML = "";
-      
-      const firstDay = new Date(currentYear, currentMonth, 1);
-      const lastDay = new Date(currentYear, currentMonth + 1, 0);
-      const daysInMonth = lastDay.getDate();
-      const startingDay = firstDay.getDay();
-      
-      // 更新月份显示
-      document.getElementById("currentMonth").textContent = 
-        `${currentYear}年 ${currentMonth + 1}月`;
-      
-      // 添加空白格子
-      for (let i = 0; i < startingDay; i++) {
-        const emptyDay = document.createElement("div");
-        emptyDay.className = "calendar-day empty";
-        calendarEl.appendChild(emptyDay);
-      }
-      
-      // 添加日期格子
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(currentYear, currentMonth, day);
-        const dateStr = formatDate(date);
-        
-        const dayEl = document.createElement("div");
-        dayEl.className = "calendar-day";
-        
-        // 检查今天
-        const today = new Date();
-        if (date.getDate() === today.getDate() && 
-            date.getMonth() === today.getMonth() && 
-            date.getFullYear() === today.getFullYear()) {
-          dayEl.classList.add("today");
-        }
-        
-        // 检查是否有记录
-        const dayEntries = entries.filter(e => e.dateOnly === dateStr);
-        if (dayEntries.length > 0) {
-          dayEl.classList.add("has-entry");
-          dayEl.onclick = () => showDateEntries(dateStr);
-          
-          // 显示心情图标
-          const moodIcon = document.createElement("div");
-          moodIcon.className = "mood-icon";
-          moodIcon.textContent = dayEntries[0].mood;
-          dayEl.appendChild(moodIcon);
-        }
-        
-        // 显示日期
-        const dateEl = document.createElement("div");
-        dateEl.className = "date";
-        dateEl.textContent = day;
-        dayEl.appendChild(dateEl);
-        
-        calendarEl.appendChild(dayEl);
-      }
-    }
 
     function changeMonth(offset) {
       currentMonth += offset;
@@ -799,24 +471,13 @@
             imageHtml = `<img src="${entry.image}" class="entry-image">`;
           }
           
-          let editInfo = "";
-          if (entry.lastEdited) {
-            editInfo = `<div class="history-info">创建于: ${entry.createdAt}<br>最后编辑于: ${entry.lastEdited}</div>`;
-          } else {
-            editInfo = `<div class="history-info">创建于: ${entry.createdAt}</div>`;
-          }
-          
           div.innerHTML = `
             <strong>${entry.date}</strong><br>
             心情：${entry.mood}<br>
             标签：${entry.category}<br>
             ${entry.text}
             ${imageHtml}
-            ${editInfo}
-            <button class="edit-btn" onclick="editEntry(${entry.id}); closeModal();">编辑</button>
-            <button class="delete-btn" onclick="moveToRecycleBin(${entry.id}); closeModal();">删除</button>
-            
-            ${renderEditHistory(entry.editHistory)}
+            <button class="delete-btn" onclick="deleteEntry(${entry.id}); closeModal();">删除</button>
           `;
           modalEntries.appendChild(div);
         });
@@ -825,17 +486,8 @@
       modal.style.display = "flex";
     }
 
-    function showRecycleBin() {
-      renderRecycleBin();
-      document.getElementById("recycleBinModal").style.display = "flex";
-    }
-
     function closeModal() {
       document.getElementById("dateModal").style.display = "none";
-    }
-
-    function closeRecycleBin() {
-      document.getElementById("recycleBinModal").style.display = "none";
     }
 
     function switchView(view) {
@@ -858,15 +510,90 @@
     // 点击模态框外部关闭
     window.onclick = function(event) {
       const modal = document.getElementById("dateModal");
-      const binModal = document.getElementById("recycleBinModal");
-      
       if (event.target === modal) {
         closeModal();
       }
-      if (event.target === binModal) {
-        closeRecycleBin();
+    }
+
+    // 修改日历渲染函数
+    function renderCalendar() {
+      const calendarEl = document.getElementById("calendar");
+      calendarEl.innerHTML = "";
+      
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDay = firstDay.getDay();
+      
+      document.getElementById("currentMonth").textContent = 
+        `${currentYear}年 ${currentMonth + 1}月`;
+      
+      for (let i = 0; i < startingDay; i++) {
+        const emptyDay = document.createElement("div");
+        emptyDay.className = "calendar-day empty";
+        calendarEl.appendChild(emptyDay);
+      }
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateStr = formatDate(date);
+        
+        const dayEl = document.createElement("div");
+        dayEl.className = "calendar-day";
+        
+        // 检查今天
+        const today = new Date();
+        if (date.getDate() === today.getDate() && 
+            date.getMonth() === today.getMonth() && 
+            date.getFullYear() === today.getFullYear()) {
+          dayEl.classList.add("today");
+        }
+        
+        // 检查是否有记录
+        const dayEntries = entries.filter(e => e.dateOnly === dateStr);
+        if (dayEntries.length > 0) {
+          dayEl.classList.add("has-entry");
+          if (dayEntries.length > 1) {
+            dayEl.classList.add("has-multiple-entries");
+          }
+          dayEl.onclick = () => showDateEntries(dateStr);
+          
+          // 创建心情图标容器
+          const moodIconsContainer = document.createElement("div");
+          moodIconsContainer.className = "mood-icons";
+          
+          // 显示前3个心情图标
+          const uniqueMoods = [...new Set(dayEntries.map(e => e.mood))];
+          const moodsToShow = uniqueMoods.slice(0, 3);
+          
+          moodsToShow.forEach(mood => {
+            const moodIcon = document.createElement("div");
+            moodIcon.className = "mood-icon";
+            moodIcon.textContent = mood;
+            moodIconsContainer.appendChild(moodIcon);
+          });
+          
+          dayEl.appendChild(moodIconsContainer);
+          
+          // 如果有多于3种心情，显示计数徽章
+          if (uniqueMoods.length > 3) {
+            const countBadge = document.createElement("div");
+            countBadge.className = "mood-count-badge";
+            countBadge.textContent = `+${uniqueMoods.length - 3}`;
+            dayEl.appendChild(countBadge);
+          }
+        }
+        
+        // 显示日期
+        const dateEl = document.createElement("div");
+        dateEl.className = "date";
+        dateEl.textContent = day;
+        dayEl.appendChild(dateEl);
+        
+        calendarEl.appendChild(dayEl);
       }
     }
+
 
     renderEntries();
   </script>
